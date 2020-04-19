@@ -8,15 +8,18 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 
-from .transformer import Transformer
+from transformer import Transformer
 
 
 class CTransformer(nn.Module):
-    def __init__(self, k, heads, depth, seq_length, num_tokens, num_classes):
+    def __init__(
+        self, k, heads, depth, seq_length, num_tokens, num_classes, max_pool=False
+    ):
+        super().__init__()
         self.num_tokens = num_tokens
         self.token_emb = nn.Embedding(num_tokens, k)
-        j
-        self.pos_embm = nn.Embedding(seq_length, k)
+        self.pos_emb = nn.Embedding(seq_length, k)
+        self.max_pool = max_pool
 
         blocks = []
         for i in range(depth):
@@ -41,5 +44,8 @@ class CTransformer(nn.Module):
         x = self.tblocks(x)
 
         # Average pool to get class probs
-        x = self.to_probs(x.mean(dim=1))
+        if self.max_pool:
+            x = self.to_probs(x.max(dim=1))
+        else:
+            x = self.to_probs(x.mean(dim=1))
         return F.log_softmax(x, dim=1)
