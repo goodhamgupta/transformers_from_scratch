@@ -15,6 +15,7 @@ class CTransformer(nn.Module):
     def __init__(self, k, heads, depth, seq_length, num_tokens, num_classes):
         self.num_tokens = num_tokens
         self.token_emb = nn.Embedding(num_tokens, k)
+        j
         self.pos_embm = nn.Embedding(seq_length, k)
 
         blocks = []
