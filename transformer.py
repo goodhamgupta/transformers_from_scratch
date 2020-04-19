@@ -10,7 +10,7 @@
 # -> Output
 # Need to combine attention with MLP. Apply layer norm and residuals
 
-from .complete_self_attention import *
+from .complete_self_attention import SelfAttentionWide, SelfAttentionNarrow
 
 
 class Transformer(nn.Module):
@@ -19,7 +19,7 @@ class Transformer(nn.Module):
     """
 
     def __init__(self, k, heads=8):
-        self.attention = SelfAttention(k, heads)
+        self.attention = SelfAttentionWide(k, heads)
         self.layer_1 = nn.LayerNorm(k)
         self.layer_2 = nn.LayerNorm(k)
 
