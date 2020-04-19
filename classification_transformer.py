@@ -33,7 +33,9 @@ class CTransformer(nn.Module):
         b, t, k = tokens.size()
 
         positions = torch.arange(t)
-        positions = self.pos_emb(positions)[None, :, :].expand # I think this is to convert the output to a batch tensor.
+        positions = self.pos_emb(positions)[
+            None, :, :
+        ].expand  # I think this is to convert the output to a batch tensor.
 
         x = tokens + positions
         x = self.tblocks(x)
