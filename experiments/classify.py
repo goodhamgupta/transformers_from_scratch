@@ -1,12 +1,10 @@
 # Classify IMDB reviews using classification transformer
-import os
 import gzip
 import math
+import os
 import random
 import sys
 from argparse import ArgumentParser
-
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import numpy as np
 import torch
@@ -14,10 +12,14 @@ import torch.nn.functional as F
 import tqdm
 from torch import nn
 from torch.autograd import Variable
-from torchtext import data, datasets, vocab
 from torch.utils.tensorboard import SummaryWriter
+from torchtext import data, datasets, vocab
 
 from classification_transformer import CTransformer
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+
 
 TEXT = data.Field(lower=True, include_lengths=True, batch_first=True)
 LABEL = data.Field(sequential=False)
@@ -40,7 +42,7 @@ def predict(arg):
 
     TEXT.build_vocab(
         train, max_size=arg.vocab_size - 2
-    )  # Subtracting 2 tokens for the <CLS> and <SEP> tokens
+    )  # Subtracting 2 tokens for the <unk> and <pad> tokens
     LABEL.build_vocab(train)
 
     train_iter, test_iter = data.BucketIterator.splits(
@@ -89,10 +91,10 @@ def predict(arg):
             label = batch.label - 1
 
             if text.size(1) > mx:
-                text = text[:mx]
+                text = text[:, :mx]
 
             output = model(text)
-            loss = F.nll_loss(out, label)
+            loss = F.nll_loss(output, label)
 
             loss.backward()  # Backprop loool
 
@@ -103,7 +105,7 @@ def predict(arg):
             optimizer.step()
             scheduler.step()
 
-            seen += input.size(0)
+            seen += text.size(0)
             tbw.add_scalar("classification/train-loss", float(loss.item()), seen)
 
         with torch.no_grad():

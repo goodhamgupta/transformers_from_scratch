@@ -10,6 +10,8 @@ from torch import nn
 
 from transformer import Transformer
 
+device = "cuda" if torch.cuda.is_available() else "cpu"
+
 
 class CTransformer(nn.Module):
     def __init__(
@@ -17,8 +19,8 @@ class CTransformer(nn.Module):
     ):
         super().__init__()
         self.num_tokens = num_tokens
-        self.token_emb = nn.Embedding(num_tokens, k)
-        self.pos_emb = nn.Embedding(seq_length, k)
+        self.token_emb = nn.Embedding(embedding_dim=k, num_embeddings=num_tokens)
+        self.pos_emb = nn.Embedding(embedding_dim=k, num_embeddings=seq_length)
         self.max_pool = max_pool
 
         blocks = []
@@ -35,17 +37,15 @@ class CTransformer(nn.Module):
         tokens = self.token_emb(x)
         b, t, k = tokens.size()
 
-        positions = torch.arange(t)
-        positions = self.pos_emb(positions)[
-            None, :, :
-        ].expand  # I think this is to convert the output to a batch tensor.
+        positions = torch.arange(t, device=device)
+        positions = self.pos_emb(positions)[None, :, :].expand(b, t, k)
 
         x = tokens + positions
         x = self.tblocks(x)
 
         # Average pool to get class probs
         if self.max_pool:
-            x = self.to_probs(x.max(dim=1))
+            x = self.to_probs(x.max(dim=1)[0])
         else:
             x = self.to_probs(x.mean(dim=1))
         return F.log_softmax(x, dim=1)

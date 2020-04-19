@@ -20,7 +20,7 @@ class SelfAttentionWide(nn.Module):
         """
         Function to compute the self-attention
         """
-        b, t, k = x.size()
+        b, t, k = input_x.size()
         h = self.heads
         queries = self.toqueries(input_x).view(b, t, h, k)
         keys = self.tokeys(input_x).view(b, t, h, k)
