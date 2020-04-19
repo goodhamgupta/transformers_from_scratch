@@ -6,7 +6,6 @@
 # Position encoding: Choose function that maps positions to real values
 import torch
 import torch.nn.functional as F
-
 from torch import nn
 
 from .transformer import Transformer
