@@ -1,4 +1,4 @@
 torch==1.4.0
-numpy==1.18.2
+numpy==1.22.0
 tensorboard==2.2.1
 torchtext==0.5.0
